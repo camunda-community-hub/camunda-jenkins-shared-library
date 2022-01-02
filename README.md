@@ -16,6 +16,7 @@ After [defining Camunda shared library](https://www.jenkins.io/doc/book/pipeline
 
 ## Steps documentation
 * [conditionalRetry](docs/conditionalRetry.md)
+* [dynamicMatrix](docs/dynamicMatrix.md)
 
 ## Contributing
 We value all feedback and contributions. If you find any issues or want to contribute,

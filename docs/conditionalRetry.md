@@ -66,3 +66,10 @@ pipeline {
     }
 }
 ```
+
+## Known issues
+
+The `conditionalRetry` step doesn't work with Jenkins
+[Declarative Matrix](https://www.jenkins.io/doc/book/pipeline/syntax/#declarative-matrix) where it use the same name
+for all stages and the stage name is used as an identifier for log parsing. In case you need to run `conditionalRetry`
+step in a parallel matrix then please use the [dynamicMatrix](../docs/dynamicMatrix.md) step.

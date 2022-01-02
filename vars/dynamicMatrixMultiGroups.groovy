@@ -35,7 +35,7 @@
                 [
                     failFast: false,
                     axes: [
-                        PLATFORM: ['linux', 'mac', 'windows'],
+                        PLATFORM: ['linux', 'mac'],
                         BROWSER: ['chrome', 'firefox']
                     ],
                     actions: {

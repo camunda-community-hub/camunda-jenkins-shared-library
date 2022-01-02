@@ -5,7 +5,7 @@
 
   A custom step mimics Jenkins declarative matrix but with better visualization and extra customization options.
 
-  It's maianly an implementation of https://www.jenkins.io/blog/2019/12/02/matrix-building-with-scripted-pipeline
+  It's mainly an implementation of https://www.jenkins.io/blog/2019/12/02/matrix-building-with-scripted-pipeline
   as a workaround for declarative matrix limitations https://issues.jenkins.io/browse/JENKINS-61280.
 
   Parameters:
