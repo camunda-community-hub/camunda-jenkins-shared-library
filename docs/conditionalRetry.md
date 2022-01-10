@@ -38,7 +38,7 @@ pipeline {
                 conditionalRetry([
                     // This is the execution node label. It could run on preemptible/spot infrastructure. 
                     agentLabel: 'spot-instance-nodes',
-                    suppressErrors: false;
+                    suppressErrors: false,
                     retryCount: 3,
                     retryDelay: 5,
                     useBuiltinFailurePatterns: false,
