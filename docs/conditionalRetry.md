@@ -28,28 +28,40 @@ and for glossary and more details please check the [step docs](../vars/condition
 pipeline {
     agent {
         node {
-            // This is the intermediate node label. It should run on a stable infrastructure. 
+            // This is the intermediate node label. It should run on a stable infrastructure.
             label 'jenkins-job-runner'
         }
     }
     stages {
+        stage('Set failure count') {
+            steps {
+                script {
+                    FAILURE_COUNT = 1
+                }
+            }
+        }
         stage('Conditional retry demo') {
             steps {
                 conditionalRetry([
-                    // This is the execution node label. It could run on preemptible/spot infrastructure. 
-                    agentLabel: 'spot-instance-nodes',
+                    // This is the execution node label. It could run on an unstable infrastructure (spot/preemptible).
+                    agentLabel: 'spot-instance-node',
                     suppressErrors: false,
                     retryCount: 3,
                     retryDelay: 5,
                     useBuiltinFailurePatterns: false,
-                    customFailurePatterns: ['test-pattern': '.*FlowInterruptedException.*'],
+                    customFailurePatterns: ['test-pattern': '.*DummyFailurePattern.*'],
                     // Demonstrate flaky stage and retry if the pattern found in the logs.
                     runSteps: {
                         sh '''
-                            if [[ $(( $RANDOM % 2 )) -eq 1 ]]; then
-                                echo FlowInterruptedException; exit 1
-                            fi
+                            echo "The runSteps mimics the steps inside the pipeline stage."
                         '''
+                        // This will fail only on the first run and it will be skipped in the second run.
+                        script {
+                            if (FAILURE_COUNT == 1) {
+                                --FAILURE_COUNT
+                                error 'This is just an error with a DummyFailurePattern that will be matched!'
+                            }
+                        }
                     },
                     postSuccess: {
                         echo "This will be printed if the steps succeeded in the retry node/agent"
