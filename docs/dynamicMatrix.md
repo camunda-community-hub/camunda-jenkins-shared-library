@@ -12,13 +12,6 @@ Those steps have been developed to overcome the limitation of the Jenkins
 for all stages and it doesn't allow to set stage names dynamically.
 (more details in [JENKINS-61280 - Allow dynamic stage names](https://issues.jenkins.io/browse/JENKINS-61280))
 
-The main reason of developing this those custom steps is to make [conditionalRetry](../docs/conditionalRetry.md) works
-in matrix which is not possible with the Jenkins built-in
-[Declarative Matrix](https://www.jenkins.io/doc/book/pipeline/syntax/#declarative-matrix)
-because unique stages name is required by [pipeline-logparser](https://github.com/gdemengin/pipeline-logparser)
-The issue is already reported in [pipeline-logparser #9](https://github.com/gdemengin/pipeline-logparser/issues/9)
-but at the end it's an issue in Jenkins itself.
-
 ## Exported variables
 
 The steps make some variables available according to the axes input as following:

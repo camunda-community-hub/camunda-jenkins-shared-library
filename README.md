@@ -4,8 +4,6 @@
 
 A [Jenkins Shared Library](https://www.jenkins.io/doc/book/pipeline/shared-libraries/) with custom Jenkins Pipeline steps that solve generic CI/CD problems.
 
-At the moment it's mainly created to share the [conditionalRetry](docs/conditionalRetry.md) step.
-
 ## Usage
 After [defining Camunda shared library](https://www.jenkins.io/doc/book/pipeline/shared-libraries/#global-shared-libraries) in your Jenkins instance, you can add it to your pipeline (e.g. your `Jenkinsfile`):
 ```

@@ -17,13 +17,15 @@ and [JENKINS-33846](https://issues.jenkins.io/browse/JENKINS-33846).
 The `conditionalRetry` step tries to avoid the need to restart the whole pipeline in the first place
 (or at lease minimizing it).
 
-## Example
+## Examples
+
+### 1. Using conditionalRetry
 
 Here is an example for a pipeline that runs this custom method,
 and for glossary and more details please check the [step docs](../vars/conditionalRetry.groovy).  
 
 ```
-@Library('camunda-community') _
+@Library(['camunda-community', 'logparser']) _
 
 pipeline {
     agent {
@@ -40,7 +42,7 @@ pipeline {
                 }
             }
         }
-        stage('Conditional retry demo') {
+        stage('ConditionalRetryDemo') {
             steps {
                 conditionalRetry([
                     // This is the execution node label. It could run on an unstable infrastructure (spot/preemptible).
@@ -79,9 +81,76 @@ pipeline {
 }
 ```
 
-## Known issues
+### 2. Using conditionalRetry with Jenkins Declarative Matrix
 
-The `conditionalRetry` step doesn't work with Jenkins
-[Declarative Matrix](https://www.jenkins.io/doc/book/pipeline/syntax/#declarative-matrix) where it use the same name
-for all stages and the stage name is used as an identifier for log parsing. In case you need to run `conditionalRetry`
-step in a parallel matrix then please use the [dynamicMatrix](../docs/dynamicMatrix.md) step.
+When `conditionalRetry` is used with
+[Jenkins Declarative Matrix](https://www.jenkins.io/doc/book/pipeline/syntax/#declarative-matrix)
+the parameter `stageNameFilterPatterns` should be set with the matrix variables since all stages in the matrix
+have the same name and till these words, having dynamic stage names is not supported in Jenkins.
+(more details about that issue in [JENKINS-61280](https://issues.jenkins.io/browse/JENKINS-61280)
+
+Here is an example how to match errors according to the matrix variables
+where each stage in the matrix will match different pattern.
+
+```
+@Library(['camunda-community', 'logparser']) _
+
+pipeline {
+    agent {
+        node {
+            label 'jenkins-job-runner'
+        }
+    }
+    stages {
+        stage('TestMatrix') {
+            matrix {
+                axes {
+                    axis {
+                        name 'PLATFORM'
+                        values 'linux', 'windows'
+                    }
+                    axis {
+                        name 'BROWSER'
+                        values 'firefox'
+                    }
+                }
+                stages {
+                    stage('ConditionalRetryDemo') {
+                        steps {
+                            conditionalRetry([
+                                agentLabel: 'spot-instance-node',
+                                suppressErrors: false,
+                                stageNameFilterPatterns: [".*PLATFORM = '${PLATFORM}', BROWSER = '${BROWSER}'.*", "ConditionalRetryDemo"],
+                                useBuiltinFailurePatterns: false,
+                                customFailurePatterns: ['linux-pattern': '.*DummyFailurePatternLinux.*', 'windows-pattern': '.*DummyFailurePatternWindows.*',],
+                                runSteps: {
+                                    sh '''
+                                        if [[ "${PLATFORM}" = "linux" ]]; then
+                                            echo 'This is just an error with a DummyFailurePatternLinux that will be matched in Linux stage'
+                                            exit 1
+                                        fi
+
+                                        if [[ "${PLATFORM}" = "windows" ]]; then
+                                            echo 'This is just an error with a DummyFailurePatternWindows that will be matched in Linux stage'
+                                            exit 1
+                                        fi
+                                    '''
+                                },
+                            ])
+                        }
+                    }
+                }
+            }
+        }
+    }
+}
+```
+
+**NOTE:**
+
+Given the fact that all stages have the same name inside the Jenkins declarative matrix,
+the parameter `stageNameFilterPatterns` must be used anyway inside declarative matrix even if the expected
+error pattern is the same in all stages.
+
+If you don't want to deal with that you can use the [dynamicMatrix](../docs/dynamicMatrix.md) step which also provides
+a matrix with better visualization and extra customization options.
