@@ -25,7 +25,7 @@
       since the retry logic is already hold by the intermediate node.
 
   Dependencies:
-    - pipeline-logparser/logparser (https://github.com/gdemengin/pipeline-logparser)
+    - pipeline-logparser/logparser@v3.0 (https://github.com/gdemengin/pipeline-logparser)
 
   Parameters:
     @param String agentLabel - DEFAULT: None, OPTIONAL: No
@@ -38,6 +38,10 @@
       Number of tries to make if one of failure patterns is matched.
     @param int retryDelay - DEFAULT: 60
       How many seconds to wait before starting the next retry.
+    @param List stageNameFilterPatterns - DEFAULT: ["${STAGE_NAME}"]
+      Set the name of the stage/branch in Jenkins pipeline to get the its logs. This is useful to work with Jenkins
+      Declarative Matrix where all stages in the matrix has the same name so the name of the stage parent is used.
+      Note, this has nothing to do with git branches, it's the Jenkins pipeline structure.
     @param boolean useBuiltinFailurePatterns - DEFAULT: True
       Use predefined failure patterns. e.g. like node disconnected errors and so on.
     @param Map customFailurePatterns - DEFAULT: Empty map
@@ -55,6 +59,8 @@
     Here is an example for a pipeline that runs this custom method:
 
     ```
+    @Library(['camunda-community', 'logparser']) _
+
     pipeline {
         agent {
             node {
@@ -120,13 +126,13 @@ import java.util.regex.Pattern
 
 @Field boolean isVerbose = false
 
-String getRetryLogs(int retryCount) {
+String getRetryLogs(List stageNameFilterPatterns, int retryCount) {
   /*
     Get logs for spacified retry only.
   */
 
   // Read logs from current stage.
-  stageLogsFull = logparser.getLogsWithBranchInfo(showStages: true, filter: ["${STAGE_NAME}"])
+  stageLogsFull = logparser.getLogsWithBranchInfo(showStages: true, filter: [stageNameFilterPatterns])
 
   // The previous retires are still showing in the logs,
   // thus using the retry identifier, we can get logs for current retry only.
@@ -184,7 +190,7 @@ boolean failurePatternsMatcher(
 void rerunConditionalRetry(Map parameters = [:], error) {
   echo('Rerun conditional retry if there is matched failure pattern')
 
-  retryLogs = getRetryLogs(parameters.retryCount + 1)
+  retryLogs = getRetryLogs(parameters.stageNameFilterPatterns, parameters.retryCount + 1)
   echo('Current retry logs:\n' + retryLogs)
 
   if (
@@ -248,6 +254,7 @@ void call(Map inputParameters = [:]) {
     suppressErrors: true,
     retryCount: 3,
     retryDelay: 60,
+    stageNameFilterPatterns: ["${STAGE_NAME}"],
     useBuiltinFailurePatterns: true,
     customFailurePatterns: [:]
   ]
@@ -257,6 +264,7 @@ void call(Map inputParameters = [:]) {
     'suppressErrors',
     'retryCount',
     'retryDelay',
+    'stageNameFilterPatterns',
     'useBuiltinFailurePatterns',
     'customFailurePatterns',
     'runSteps',
