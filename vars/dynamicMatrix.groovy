@@ -96,6 +96,7 @@ void call(Map givenParameters = [:]) {
   defaultParameters = [
     failFast: true,
     lockName: "_",
+    lockQuantity: 1,
     stageNameSeparator: '_',
     extraVars: [:],
     returnStages: false,
@@ -135,7 +136,7 @@ void call(Map givenParameters = [:]) {
     matrixStages[groupID] = { ->
       stage(groupID) {
         if (parameters.lockName != "_") {
-          lock(parameters.lockName){
+          lock(label: ${parameters.lockName}, quantity: ${parameters.lockQuantity}){
             withEnv(groupVars) {
               parameters.actions()
             }
