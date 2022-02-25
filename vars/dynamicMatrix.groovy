@@ -95,6 +95,7 @@ void call(Map givenParameters = [:]) {
   // Optional parameters.
   defaultParameters = [
     failFast: true,
+    lockName: "test__",
     stageNameSeparator: '_',
     extraVars: [:],
     returnStages: false,
@@ -133,6 +134,9 @@ void call(Map givenParameters = [:]) {
 
     matrixStages[groupID] = { ->
       stage(groupID) {
+        option{
+          lock(parameters.lock_name())
+        }
         withEnv(groupVars) {
           parameters.actions()
         }
