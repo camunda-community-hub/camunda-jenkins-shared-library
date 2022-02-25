@@ -69,7 +69,7 @@ List getMatrixAxes(Map axes) {
     axisValues.each { axisValue ->
       axisCombination << [(axisName): axisValue]
     }
-    axesFlatten << axisList
+    axesFlatten << axisCombination
   }
   axesFlatten.combinations()*.sum()
 }
@@ -95,6 +95,8 @@ void call(Map givenParameters = [:]) {
   // Optional parameters.
   defaultParameters = [
     failFast: true,
+    lockName: "_",
+    lockQuantity: 1,
     stageNameSeparator: '_',
     extraVars: [:],
     returnStages: false,
@@ -105,8 +107,7 @@ void call(Map givenParameters = [:]) {
   List availableParameters = (mandatoryParameters.keySet() + defaultParameters.keySet()) as List
 
   givenParameters.keySet().each { parameter ->
-    assert parameter in availableParameters,
-    echo "[${stepName}] Invalid parameter '${parameter}'. Available parameter are: ${availableParameters}"
+    assert parameter in availableParameters : "[${stepName}]  Invalid parameter '${parameter}'. Available parameter are: ${availableParameters}"
   }
 
   // The parameters var must be copied as a local var (with def) to allow the method to work within loops.
@@ -129,12 +130,21 @@ void call(Map givenParameters = [:]) {
       mapToKeyValueList(parameters.extraVars)
     )
 
-    echo "[${stepName}] Matrix group vars are:\n ${groupVars}"
+    
+    "[${stepName}] Matrix group vars are:\n ${groupVars}"
 
     matrixStages[groupID] = { ->
       stage(groupID) {
-        withEnv(groupVars) {
-          parameters.actions()
+        if (parameters.lockName != "_") {
+          lock(resource: parameters.lockName, quantity: parameters.lockQuantity){
+            withEnv(groupVars) {
+              parameters.actions()
+            }
+          }
+        } else {
+          withEnv(groupVars) {
+              parameters.actions()
+          }
         }
       }
     }
