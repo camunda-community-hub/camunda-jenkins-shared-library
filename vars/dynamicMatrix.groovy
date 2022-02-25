@@ -134,11 +134,10 @@ void call(Map givenParameters = [:]) {
 
     matrixStages[groupID] = { ->
       stage(groupID) {
-        options{
-          lock(parameters.lock_name())
-        }
-        withEnv(groupVars) {
-          parameters.actions()
+        lock(parameters.lock_name()){
+          withEnv(groupVars) {
+            parameters.actions()
+          }
         }
       }
     }
