@@ -136,7 +136,7 @@ void call(Map givenParameters = [:]) {
     matrixStages[groupID] = { ->
       stage(groupID) {
         if (parameters.lockName != "_") {
-          lock(parameters.lockName, quantity: parameters.lockQuantity){
+          lock(resource: parameters.lockName, quantity: parameters.lockQuantity){
             withEnv(groupVars) {
               parameters.actions()
             }
