@@ -69,7 +69,7 @@ List getMatrixAxes(Map axes) {
     axisValues.each { axisValue ->
       axisCombination << [(axisName): axisValue]
     }
-    axesFlatten << axisList
+    axesFlatten << axisCombination
   }
   axesFlatten.combinations()*.sum()
 }
