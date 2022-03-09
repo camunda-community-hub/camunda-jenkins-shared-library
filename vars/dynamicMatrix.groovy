@@ -106,7 +106,7 @@ void call(Map givenParameters = [:]) {
 
   givenParameters.keySet().each { parameter ->
     assert parameter in availableParameters,
-    echo "[${stepName}] Invalid parameter '${parameter}'. Available parameter are: ${availableParameters}"
+    "[${stepName}] Invalid parameter '${parameter}'. Available parameter are: ${availableParameters}"
   }
 
   // The parameters var must be copied as a local var (with def) to allow the method to work within loops.
