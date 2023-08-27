@@ -41,6 +41,7 @@
     @param List stageNameFilterPatterns - DEFAULT: ["${STAGE_NAME}"]
       Set the name of the stage/branch in Jenkins pipeline to get the its logs. This is useful to work with Jenkins
       Declarative Matrix where all stages in the matrix has the same name so the name of the stage parent is used.
+      WARNING: this name will be used as a regexp, so don't use special characters: [ ] \ / ^ $ . | ? * + ( ) { }
       Note, this has nothing to do with git branches, it's the Jenkins pipeline structure.
     @param boolean useBuiltinFailurePatterns - DEFAULT: True
       Use predefined failure patterns. e.g. like node disconnected errors and so on.
